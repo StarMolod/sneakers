@@ -7,11 +7,34 @@ import CardList from './components/CardList.vue'
 import Drawer from './components/Drawer.vue'
 
 const items = ref([]);
+const cart = ref([])
+
+
+const drawerOpen = ref(false);
+
+const closeDrawer = () => {
+  drawerOpen.value = false
+}
+
+const openDrawer = () => {
+  drawerOpen.value = true
+}
 
 const filters = reactive({
   sortBy: 'title',
   searchQuery: '',
 })
+
+const addToCart = (item) => {
+  if (!item.isAdded) {
+    cart.value.push(item)
+    item.isAdded = true
+  } else {
+    cart.value.splice(cart.value.indexOf(item), 1)
+    item.isAdded = false
+  }
+  console.log(cart)
+}
 
 const onChangeSelect = (event) => {
   filters.sortBy = event.target.value;
@@ -43,11 +66,27 @@ const fetchFavorites = async () => {
     console.log(err)
   }
 }
-
+  
 const addToFavorite = async (item) => {
-  item.isFavorite = !item.isFavorite
+  try {
+    if (!item.isFavorite) {
+      const obj = {
+        parentId: item.id
+      }
 
-  console.log(item)
+      item.isFavorite = true;
+
+      const { data } = await axios.post(`https://28b47f53a7f59a44.mokky.dev/favorites`, obj)
+      
+      item.favoriteId = data.id;
+    } else {
+      item.isFavorite = false;
+      await axios.delete(`https://28b47f53a7f59a44.mokky.dev/favorites/${item.favoriteId}`)
+      item.favoriteId = null
+    }
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 const fetchItems = async () => {
@@ -61,7 +100,8 @@ const fetchItems = async () => {
       params.title = `*${filters.searchQuery}*`;
     }
 
-    const { data } = await axios.get(`https://604781a0efa572c1.mokky.dev/items`,
+    const { data } = await axios.get(`https://28b47f53a7f59a44.mokky.dev/items`,
+
     {
       params
     }
@@ -69,6 +109,7 @@ const fetchItems = async () => {
     items.value = data.map(obj => ({
       ...obj,
       isFavorite: false,
+      favoriteId: null,
       isAdded: false,
     }));
   } catch (err) {
@@ -82,12 +123,17 @@ onMounted(async () => {
 });
 watch(filters, fetchItems)
 
-provide('addToFavorite', addToFavorite);
+provide('cardActions', {
+  closeDrawer, 
+  openDrawer
+})
 </script>
 
 <template>
+  <Drawer v-if="drawerOpen" />
+
   <div class="bg-slate-50 w-5/6 m-auto rounded-xl shadow-xl mt-4">
-    <Header />
+    <Header @open-drawer="openDrawer"/>
 
     <div class="p-8">
       <div class="flex justify-between items-center">
@@ -113,9 +159,11 @@ provide('addToFavorite', addToFavorite);
       </div>
 
       <div class="mt-8">
-        <CardList :items="items" />
+        <CardList :items="items" @add-to-favorite="addToFavorite"
+        @add-to-cart="addToCart"/>
       </div>
     </div>
   </div>
 </template>
-//4-10-27
+//5-01-31
+//fas
