@@ -28,7 +28,8 @@ const props = defineProps({
         <b>{{ price }} руб.</b>
       </div>
 
-      <img @click="onClickAdd" :src="!isAdded ? '/plus.svg' : '/checked.svg'" alt="Plus">
+      <img @click="onClickAdd"
+      class="w-9" :src="!isAdded ? '/plus.svg' : '/checked.svg'" alt="Plus">
 
     </div>
   </div>

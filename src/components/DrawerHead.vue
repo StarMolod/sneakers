@@ -10,7 +10,7 @@
     <svg 
     @click="closeDrawer" 
     class="opacity-40 cursor-pointer rotate-180 hover:opacity-100 transition hover:-translate-x-1"
-      width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      width="20" height="20" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
 
       <path d="M1 7H14.7143" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       

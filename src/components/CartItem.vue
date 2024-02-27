@@ -11,7 +11,7 @@
 
 <template>
   <div class="flex items-center border border-slate-200 p-2 rounded-xl gap-4 mt-2">
-    <img class="w-1/3 h-1/3" :src="imageUrl" :alt="title">
+    <img class="w-1/3 h-1/3 min-h-24 min-w-24" :src="imageUrl" :alt="title">
 
     <div class="flex self-end flex-col ml-2 text-sm flex-1">
       <p>{{title}}</p>
