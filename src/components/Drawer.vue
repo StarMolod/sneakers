@@ -1,19 +1,41 @@
 <script setup>
+  import axios from 'axios';
+  import { ref, inject, computed } from 'vue';
   import DrawerHead from './DrawerHead.vue';
   import CartListItem from './CartListItem.vue'
   import InfoBlock from './InfoBlock.vue';
 
-  const emit = defineEmits(['createOrder'])
-
-const props = defineProps({
+  const props = defineProps({
     totalPrice: Number,
     vatPrice: Number,
-    buttonDisabled: Boolean,
   })
 
+  const {cart, closeDrawer} = inject('cart')
 
+  const isCreating = ref(false);
+  const orderId = ref(null)
 
+  const createOrder = async () => {
+  try {
+    isCreating.value = true;
+    const {data} = await axios.post(`https://28b47f53a7f59a44.mokky.dev/orders`, {
+      items: cart.value,
+      totalPrice: props.totalPrice.value
+    })
+    
+    cart.value = []
 
+    orderId.value = data.id
+  } catch (err) {
+    console.log(err)
+  } finally {
+    isCreating.value = false
+  }
+}
+
+const cartIsEmpty = computed(()=>cart.value.length === 0);
+
+const ButtonDisabled = computed(()=>isCreating.value || cartIsEmpty.value);
 </script>
 
 
@@ -22,11 +44,17 @@ const props = defineProps({
   <div class="bg-white w-1/3 h-full fixed right-0 top-0 z-20 p-6">
     <DrawerHead /> 
 
-    <div v-if="!totalPrice" class="flex h-full items-center">
-      <InfoBlock
+    <div v-if="!totalPrice || orderId" class="flex h-full items-center">
+      <InfoBlock 
+      v-if="!totalPrice && !orderId"
       title="Корзина пустая" 
       description="Добавьте хотябы один товар, чтобы сделать заказ." 
       image-url="/package-icon.png"/>
+      <InfoBlock
+      v-if="orderId"
+      title="Заказ оформлен" 
+      :description="`Ваш заказ #${orderId} скоро будет передан курьерской доставке`"
+      image-url="/order-success-icon.png"/>
     </div>
 
     <div v-else>
@@ -45,8 +73,8 @@ const props = defineProps({
         </div>
   
         <button
-        :disabled="buttonDisabled"
-        @click="() => emit('createOrder')"
+        :disabled="ButtonDisabled"
+        @click="createOrder"
         class="mt-4 bg-lime-500 w-full rounded-xl py-2 text-white disabled:bg-slate-300 hover:bg-lime-600 active:bg-lime-700 cursor-pointer">
           Оформить заказ
         </button>  

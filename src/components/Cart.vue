@@ -9,12 +9,18 @@ const props = defineProps({
     onClickFavorite: Function,
     onClickAdd: Function,
   })
+
+  const visibleFavoriteButton = Boolean(props.onClickAdd)
 </script>
 
 <template>
   <div class="relative bg-white border border-slate-100 rounded-3xl p-4 cursor-pointer transition hover:-translate-y-2 hover:shadow-xl">
     
-    <img :src="!isFavorite ? '/like-2.svg' : '/like-1.svg'" alt="like 1" class="absolute top-4 left-4"
+    <img 
+    v-if="onClickFavorite"
+    :src="!isFavorite ? '/like-2.svg' : '/like-1.svg'" 
+    alt="like 1" 
+    class="absolute top-4 left-4"
     @click="onClickFavorite"
     >
 
@@ -28,7 +34,7 @@ const props = defineProps({
         <b>{{ price }} руб.</b>
       </div>
 
-      <img @click="onClickAdd"
+      <img v-if="onClickAdd"  @click="onClickAdd"
       class="w-9" :src="!isAdded ? '/plus.svg' : '/checked.svg'" alt="Plus">
 
     </div>

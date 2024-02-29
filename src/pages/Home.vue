@@ -1,6 +1,7 @@
 <script setup>
 import {reactive, watch, ref, onMounted} from 'vue'
 import axios from 'axios'
+import debounce from 'lodash.debounce'
 import {inject} from 'vue'
 import CartList from '../components/CartList.vue'
 
@@ -26,15 +27,15 @@ const onChangeSelect = (event) => {
   filters.sortBy = event.target.value;
 };
 
-const onChangeSearchInput = (event) => {
+const onChangeSearchInput = debounce((event) => {
   filters.searchQuery = event.target.value;
-};
+}, 500)
 
 const addToFavorite = async (item) => {
   try {
     if (!item.isFavorite) {
       const obj = {
-        parentId: item.id
+        item_id: item.id
       }
 
       item.isFavorite = true;
@@ -59,7 +60,7 @@ const fetchFavorites = async () => {
     )
     // `https://604781a0efa572c1.mokky.dev/favorites`
     items.value = items.value.map(item => {
-      const favorite = favorites.find((favorite) => favorite.parentId === item.id);
+      const favorite = favorites.find((favorite) => favorite.item_id === item.id);
 
       if(!favorite) {
         return item
@@ -130,7 +131,7 @@ watch(filters, fetchItems)
   <div class="flex justify-between items-center">
     <h2 class="text-3xl font-bold mb-3 text-slate-600">Все кроссовки</h2>
 
-    <div class="flex gap-4">
+    <div class="flex gap-4 flex-wrap">
       <select @change="onChangeSelect" class="py-2 px-3 border rounded-md outline-none">
         <option value="name">По названию</option>
         <option value="price">По цене (дешевле)</option>
@@ -141,7 +142,7 @@ watch(filters, fetchItems)
         <img class="absolute left-2 top-3" src="/search.svg" alt="" />
         <input
           @input="onChangeSearchInput"
-          class="border rounded-md py-2 pl-8 pr-4 outline-none focus:border-gray-400"
+          class="border rounded-md py-2 pl-8 pr-2 outline-none focus:border-gray-400"
           type="text"
           placeholder="Поиск..."
         />
